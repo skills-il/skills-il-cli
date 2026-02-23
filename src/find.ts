@@ -12,7 +12,7 @@ const MAGENTA = '\x1b[35m';
 const YELLOW = '\x1b[33m';
 
 // API endpoint for skills search
-const SEARCH_API_BASE = process.env.SKILLS_API_URL || 'https://skills.sh';
+const SEARCH_API_BASE = process.env.SKILLS_API_URL || 'https://agentskills.co.il';
 
 function formatInstalls(count: number): string {
   if (!count || count <= 0) return '';
@@ -268,8 +268,8 @@ export async function runFind(args: string[]): Promise<void> {
   const query = args.join(' ');
   const isNonInteractive = !process.stdin.isTTY;
   const agentTip = `${DIM}Tip: if running in a coding agent, follow these steps:${RESET}
-${DIM}  1) npx skills find [query]${RESET}
-${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
+${DIM}  1) npx skills-il find [query]${RESET}
+${DIM}  2) npx skills-il add <owner/repo@skill>${RESET}`;
 
   // Non-interactive mode: just print results and exit
   if (query) {
@@ -287,7 +287,7 @@ ${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
       return;
     }
 
-    console.log(`${DIM}Install with${RESET} npx skills add <owner/repo@skill>`);
+    console.log(`${DIM}Install with${RESET} npx skills-il add <owner/repo@skill>`);
     console.log();
 
     for (const skill of results.slice(0, 6)) {
@@ -296,7 +296,7 @@ ${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
       console.log(
         `${TEXT}${pkg}@${skill.name}${RESET}${installs ? ` ${CYAN}${installs}${RESET}` : ''}`
       );
-      console.log(`${DIM}└ https://skills.sh/${skill.slug}${RESET}`);
+      console.log(`${DIM}└ https://agentskills.co.il/${skill.slug}${RESET}`);
       console.log();
     }
     return;
@@ -340,10 +340,10 @@ ${DIM}  2) npx skills add <owner/repo@skill>${RESET}`;
   const info = getOwnerRepoFromString(pkg);
   if (info && (await isRepoPublic(info.owner, info.repo))) {
     console.log(
-      `${DIM}View the skill at${RESET} ${TEXT}https://skills.sh/${selected.slug}${RESET}`
+      `${DIM}View the skill at${RESET} ${TEXT}https://agentskills.co.il/${selected.slug}${RESET}`
     );
   } else {
-    console.log(`${DIM}Discover more skills at${RESET} ${TEXT}https://skills.sh${RESET}`);
+    console.log(`${DIM}Discover more skills at${RESET} ${TEXT}https://agentskills.co.il${RESET}`);
   }
 
   console.log();

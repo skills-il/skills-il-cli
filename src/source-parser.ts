@@ -277,6 +277,62 @@ export function parseSource(input: string): ParsedSource {
  * Must be HTTP(S) and not a known git host (GitHub, GitLab).
  * Also excludes URLs that look like git repos (.git suffix).
  */
+// ─── Registry resolution for bare skill names ───
+
+interface RegistryCache {
+  data: Record<string, string>;
+  fetchedAt: number;
+}
+
+let registryCache: RegistryCache | null = null;
+const REGISTRY_TTL_MS = 3_600_000; // 1 hour
+
+function isBareSkillName(input: string): boolean {
+  return (
+    !input.includes('/') &&
+    !input.includes(':') &&
+    !input.startsWith('.') &&
+    !input.startsWith('/') &&
+    !isLocalPath(input)
+  );
+}
+
+async function fetchRegistry(): Promise<Record<string, string>> {
+  if (registryCache && Date.now() - registryCache.fetchedAt < REGISTRY_TTL_MS) {
+    return registryCache.data;
+  }
+  try {
+    const url = process.env.SKILLS_IL_REGISTRY_URL || 'https://agentskills.co.il/api/registry.json';
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return registryCache?.data ?? {};
+    const data = (await res.json()) as Record<string, string>;
+    registryCache = { data, fetchedAt: Date.now() };
+    return data;
+  } catch {
+    return registryCache?.data ?? {};
+  }
+}
+
+/**
+ * Async wrapper around parseSource that resolves bare skill names via a registry.
+ * If the input is a bare name (e.g., "tax-invoice"), it checks the registry first.
+ * If found, resolves to the GitHub source. Otherwise falls through to parseSource.
+ */
+export async function resolveAndParseSource(input: string): Promise<ParsedSource> {
+  if (isBareSkillName(input)) {
+    try {
+      const registry = await fetchRegistry();
+      const resolved = registry[input];
+      if (resolved) {
+        return parseSource(resolved);
+      }
+    } catch {
+      // Fall through to normal parsing
+    }
+  }
+  return parseSource(input);
+}
+
 function isWellKnownUrl(input: string): boolean {
   if (!input.startsWith('http://') && !input.startsWith('https://')) {
     return false;

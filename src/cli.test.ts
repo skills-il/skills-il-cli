@@ -7,7 +7,7 @@ describe('skills CLI', () => {
   describe('--help', () => {
     it('should display help message', () => {
       const output = runCliOutput(['--help']);
-      expect(output).toContain('Usage: skills <command> [options]');
+      expect(output).toContain('Usage: skills-il <command> [options]');
       expect(output).toContain('Manage Skills:');
       expect(output).toContain('init [name]');
       expect(output).toContain('add <package>');
@@ -47,12 +47,12 @@ describe('skills CLI', () => {
   describe('no arguments', () => {
     it('should display banner', () => {
       const output = stripLogo(runCliOutput([]));
-      expect(output).toContain('The open agent skills ecosystem');
-      expect(output).toContain('npx skills add');
-      expect(output).toContain('npx skills check');
-      expect(output).toContain('npx skills update');
-      expect(output).toContain('npx skills init');
-      expect(output).toContain('skills.sh');
+      expect(output).toContain('The Israeli agent skills CLI');
+      expect(output).toContain('npx skills-il add');
+      expect(output).toContain('npx skills-il check');
+      expect(output).toContain('npx skills-il update');
+      expect(output).toContain('npx skills-il init');
+      expect(output).toContain('agentskills.co.il');
     });
   });
 
@@ -61,7 +61,7 @@ describe('skills CLI', () => {
       const output = runCliOutput(['unknown-command']);
       expect(output).toMatchInlineSnapshot(`
         "Unknown command: unknown-command
-        Run skills --help for usage.
+        Run skills-il --help for usage.
         "
       `);
     });

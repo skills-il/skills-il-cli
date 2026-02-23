@@ -3,7 +3,13 @@ import pc from 'picocolors';
 import { existsSync } from 'fs';
 import { homedir } from 'os';
 import { sep } from 'path';
-import { parseSource, getOwnerRepo, parseOwnerRepo, isRepoPrivate } from './source-parser.ts';
+import {
+  parseSource,
+  resolveAndParseSource,
+  getOwnerRepo,
+  parseOwnerRepo,
+  isRepoPrivate,
+} from './source-parser.ts';
 import { searchMultiselect, cancelSymbol } from './prompts/search-multiselect.ts';
 
 // Helper to check if a value is a cancel symbol (works with both clack and our custom prompts)
@@ -144,7 +150,7 @@ function buildSecurityLines(
 
   // Footer link
   lines.push('');
-  lines.push(`${pc.dim('Details:')} ${pc.dim(`https://skills.sh/${source}`)}`);
+  lines.push(`${pc.dim('Details:')} ${pc.dim(`https://agentskills.co.il/${source}`)}`);
 
   return lines;
 }
@@ -1568,10 +1574,12 @@ export async function runAdd(args: string[], options: AddOptions = {}): Promise<
     );
     console.log();
     console.log(pc.dim('  Usage:'));
-    console.log(`    ${pc.cyan('npx skills add')} ${pc.yellow('<source>')} ${pc.dim('[options]')}`);
+    console.log(
+      `    ${pc.cyan('npx skills-il add')} ${pc.yellow('<source>')} ${pc.dim('[options]')}`
+    );
     console.log();
     console.log(pc.dim('  Example:'));
-    console.log(`    ${pc.cyan('npx skills add')} ${pc.yellow('vercel-labs/agent-skills')}`);
+    console.log(`    ${pc.cyan('npx skills-il add')} ${pc.yellow('vercel-labs/agent-skills')}`);
     console.log();
     process.exit(1);
   }
@@ -1584,7 +1592,7 @@ export async function runAdd(args: string[], options: AddOptions = {}): Promise<
   }
 
   console.log();
-  p.intro(pc.bgCyan(pc.black(' skills ')));
+  p.intro(pc.bgCyan(pc.black(' skills-il ')));
 
   if (!process.stdin.isTTY) {
     showInstallTip();
@@ -1596,7 +1604,7 @@ export async function runAdd(args: string[], options: AddOptions = {}): Promise<
     const spinner = p.spinner();
 
     spinner.start('Parsing source...');
-    const parsed = parseSource(source);
+    const parsed = await resolveAndParseSource(source);
     spinner.stop(
       `Source: ${parsed.type === 'local' ? parsed.localPath! : parsed.url}${parsed.ref ? ` @ ${pc.yellow(parsed.ref)}` : ''}${parsed.subpath ? ` (${parsed.subpath})` : ''}${parsed.skillFilter ? ` ${pc.dim('@')}${pc.cyan(parsed.skillFilter)}` : ''}`
     );
@@ -2241,7 +2249,7 @@ async function promptForFindSkills(
       try {
         // Call runAdd directly instead of spawning subprocess
         // Use the same agents that were selected for the original install (minus replit)
-        await runAdd(['vercel-labs/skills'], {
+        await runAdd(['skills-il/skills'], {
           skill: ['find-skills'],
           global: true,
           yes: true,
@@ -2249,13 +2257,13 @@ async function promptForFindSkills(
         });
       } catch {
         p.log.warn('Failed to install find-skills. You can try again with:');
-        p.log.message(pc.dim('  npx skills add vercel-labs/skills@find-skills -g -y --all'));
+        p.log.message(pc.dim('  npx skills-il add skills-il/skills@find-skills -g -y --all'));
       }
     } else {
       // User declined - dismiss the prompt
       await dismissPrompt('findSkillsPrompt');
       p.log.message(
-        pc.dim('You can install it later with: npx skills add vercel-labs/skills@find-skills')
+        pc.dim('You can install it later with: npx skills-il add skills-il/skills@find-skills')
       );
     }
   } catch {

@@ -133,7 +133,7 @@ export async function runSync(args: string[], options: SyncOptions = {}): Promis
   const cwd = process.cwd();
 
   console.log();
-  p.intro(pc.bgCyan(pc.black(' skills experimental_sync ')));
+  p.intro(pc.bgCyan(pc.black(' skills-il experimental_sync ')));
 
   const spinner = p.spinner();
 

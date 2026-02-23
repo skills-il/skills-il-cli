@@ -1,5 +1,5 @@
-const TELEMETRY_URL = 'https://add-skill.vercel.sh/t';
-const AUDIT_URL = 'https://add-skill.vercel.sh/audit';
+const TELEMETRY_URL = 'https://agentskills.co.il/api/telemetry';
+const AUDIT_URL = 'https://agentskills.co.il/api/audit';
 
 interface InstallTelemetryData {
   event: 'install';

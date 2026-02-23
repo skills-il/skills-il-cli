@@ -1,11 +1,10 @@
 {
-  "name": "skills",
-  "version": "1.4.1",
-  "description": "The open agent skills ecosystem",
+  "name": "skills-il",
+  "version": "0.1.0",
+  "description": "The Israeli agent skills CLI - curated skills for AI agents",
   "type": "module",
   "bin": {
-    "skills": "./bin/cli.mjs",
-    "add-skill": "./bin/cli.mjs"
+    "skills-il": "./bin/cli.mjs"
   },
   "files": [
     "dist",
@@ -80,13 +79,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vercel-labs/skills.git"
+    "url": "git+https://github.com/skills-il/skills-il-cli.git"
   },
-  "homepage": "https://github.com/vercel-labs/skills#readme",
+  "homepage": "https://agentskills.co.il",
   "bugs": {
-    "url": "https://github.com/vercel-labs/skills/issues"
+    "url": "https://github.com/skills-il/skills-il-cli/issues"
   },
-  "author": "",
+  "author": "Skills IL",
   "license": "MIT",
   "devDependencies": {
     "@clack/prompts": "^0.11.0",

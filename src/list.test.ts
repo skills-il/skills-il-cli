@@ -283,7 +283,7 @@ description: A test skill
   describe('banner', () => {
     it('should include list command in banner', () => {
       const result = runCli([]);
-      expect(result.stdout).toContain('npx skills list');
+      expect(result.stdout).toContain('npx skills-il list');
       expect(result.stdout).toContain('List installed skills');
     });
   });
