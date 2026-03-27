@@ -30,6 +30,8 @@ export interface SkillLockEntry {
   installedAt: string;
   /** ISO timestamp when the skill was last updated */
   updatedAt: string;
+  /** Name of the plugin this skill belongs to (if any) */
+  pluginName?: string;
 }
 
 /**
@@ -56,9 +58,14 @@ export interface SkillLockFile {
 
 /**
  * Get the path to the global skill lock file.
- * Located at ~/.agents/.skill-lock.json
+ * Use $XDG_STATE_HOME/skills/.skill-lock.json if set.
+ * otherwise fall back to ~/.agents/.skill-lock.json
  */
 export function getSkillLockPath(): string {
+  const xdgStateHome = process.env.XDG_STATE_HOME;
+  if (xdgStateHome) {
+    return join(xdgStateHome, 'skills', LOCK_FILE);
+  }
   return join(homedir(), AGENTS_DIR, LOCK_FILE);
 }
 

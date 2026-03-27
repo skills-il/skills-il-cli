@@ -39,7 +39,7 @@ export const agents: Record<AgentType, AgentConfig> = {
   antigravity: {
     name: 'antigravity',
     displayName: 'Antigravity',
-    skillsDir: '.agent/skills',
+    skillsDir: '.agents/skills',
     globalSkillsDir: join(home, '.gemini/antigravity/skills'),
     detectInstalled: async () => {
       return existsSync(join(home, '.gemini/antigravity'));
@@ -79,8 +79,8 @@ export const agents: Record<AgentType, AgentConfig> = {
   cline: {
     name: 'cline',
     displayName: 'Cline',
-    skillsDir: '.cline/skills',
-    globalSkillsDir: join(home, '.cline/skills'),
+    skillsDir: '.agents/skills',
+    globalSkillsDir: join(home, '.agents', 'skills'),
     detectInstalled: async () => {
       return existsSync(join(home, '.cline'));
     },
@@ -148,6 +148,15 @@ export const agents: Record<AgentType, AgentConfig> = {
       return existsSync(join(home, '.cursor'));
     },
   },
+  deepagents: {
+    name: 'deepagents',
+    displayName: 'Deep Agents',
+    skillsDir: '.agents/skills',
+    globalSkillsDir: join(home, '.deepagents/agent/skills'),
+    detectInstalled: async () => {
+      return existsSync(join(home, '.deepagents'));
+    },
+  },
   droid: {
     name: 'droid',
     displayName: 'Droid',
@@ -155,6 +164,15 @@ export const agents: Record<AgentType, AgentConfig> = {
     globalSkillsDir: join(home, '.factory/skills'),
     detectInstalled: async () => {
       return existsSync(join(home, '.factory'));
+    },
+  },
+  firebender: {
+    name: 'firebender',
+    displayName: 'Firebender',
+    skillsDir: '.agents/skills',
+    globalSkillsDir: join(home, '.firebender/skills'),
+    detectInstalled: async () => {
+      return existsSync(join(home, '.firebender'));
     },
   },
   'gemini-cli': {
@@ -345,6 +363,15 @@ export const agents: Record<AgentType, AgentConfig> = {
     globalSkillsDir: join(home, '.trae-cn/skills'),
     detectInstalled: async () => {
       return existsSync(join(home, '.trae-cn'));
+    },
+  },
+  warp: {
+    name: 'warp',
+    displayName: 'Warp',
+    skillsDir: '.agents/skills',
+    globalSkillsDir: join(home, '.agents/skills'),
+    detectInstalled: async () => {
+      return existsSync(join(home, '.warp'));
     },
   },
   windsurf: {

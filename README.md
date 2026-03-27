@@ -5,7 +5,7 @@ The Israeli agent skills CLI - curated skills for AI agents.
 > Fork of [vercel-labs/skills](https://github.com/vercel-labs/skills) (MIT licensed).
 
 <!-- agent-list:start -->
-Supports **OpenCode**, **Claude Code**, **Codex**, **Cursor**, and [37 more](#available-agents).
+Supports **OpenCode**, **Claude Code**, **Codex**, **Cursor**, and [40 more](#available-agents).
 <!-- agent-list:end -->
 
 ## Install a Skill
@@ -44,7 +44,7 @@ npx skills-il add tax-invoice
 | Option                    | Description                                                                                                                                        |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `-g, --global`            | Install to user directory instead of project                                                                                                       |
-| `-a, --agent <agents...>` | <!-- agent-names:start -->Target specific agents (e.g., `claude-code`, `codex`). See [Available Agents](#available-agents)<!-- agent-names:end -->                  |
+| `-a, --agent <agents...>` | <!-- agent-names:start -->Target specific agents (e.g., `claude-code`, `codex`). See [Available Agents](#available-agents)<!-- agent-names:end --> |
 | `-s, --skill <skills...>` | Install specific skills by name (use `'*'` for all skills)                                                                                         |
 | `-l, --list`              | List available skills without installing                                                                                                           |
 | `--copy`                  | Copy files instead of symlinking to agent directories                                                                                              |
@@ -215,11 +215,11 @@ Skills can be installed to any of these agents:
 | Agent | `--agent` | Project Path | Global Path |
 |-------|-----------|--------------|-------------|
 | Amp, Kimi Code CLI, Replit, Universal | `amp`, `kimi-cli`, `replit`, `universal` | `.agents/skills/` | `~/.config/agents/skills/` |
-| Antigravity | `antigravity` | `.agent/skills/` | `~/.gemini/antigravity/skills/` |
+| Antigravity | `antigravity` | `.agents/skills/` | `~/.gemini/antigravity/skills/` |
 | Augment | `augment` | `.augment/skills/` | `~/.augment/skills/` |
 | Claude Code | `claude-code` | `.claude/skills/` | `~/.claude/skills/` |
 | OpenClaw | `openclaw` | `skills/` | `~/.openclaw/skills/` |
-| Cline | `cline` | `.cline/skills/` | `~/.cline/skills/` |
+| Cline, Warp | `cline`, `warp` | `.agents/skills/` | `~/.agents/skills/` |
 | CodeBuddy | `codebuddy` | `.codebuddy/skills/` | `~/.codebuddy/skills/` |
 | Codex | `codex` | `.agents/skills/` | `~/.codex/skills/` |
 | Command Code | `command-code` | `.commandcode/skills/` | `~/.commandcode/skills/` |
@@ -227,7 +227,9 @@ Skills can be installed to any of these agents:
 | Cortex Code | `cortex` | `.cortex/skills/` | `~/.snowflake/cortex/skills/` |
 | Crush | `crush` | `.crush/skills/` | `~/.config/crush/skills/` |
 | Cursor | `cursor` | `.agents/skills/` | `~/.cursor/skills/` |
+| Deep Agents | `deepagents` | `.agents/skills/` | `~/.deepagents/agent/skills/` |
 | Droid | `droid` | `.factory/skills/` | `~/.factory/skills/` |
+| Firebender | `firebender` | `.agents/skills/` | `~/.firebender/skills/` |
 | Gemini CLI | `gemini-cli` | `.agents/skills/` | `~/.gemini/skills/` |
 | GitHub Copilot | `github-copilot` | `.agents/skills/` | `~/.copilot/skills/` |
 | Goose | `goose` | `.goose/skills/` | `~/.config/goose/skills/` |
@@ -322,11 +324,9 @@ The CLI searches for skills in these locations within a repository:
 - `skills/.experimental/`
 - `skills/.system/`
 - `.agents/skills/`
-- `.agent/skills/`
 - `.augment/skills/`
 - `.claude/skills/`
 - `./skills/`
-- `.cline/skills/`
 - `.codebuddy/skills/`
 - `.commandcode/skills/`
 - `.continue/skills/`
@@ -432,6 +432,35 @@ Telemetry is automatically disabled in CI environments.
 - [Skills IL Website](https://agentskills.co.il)
 - [Skills IL Skills Collection](https://github.com/skills-il/skills)
 - [Upstream: Vercel Skills CLI](https://github.com/vercel-labs/skills)
+- [Skills Directory](https://skills.sh)
+- [Amp Skills Documentation](https://ampcode.com/manual#agent-skills)
+- [Antigravity Skills Documentation](https://antigravity.google/docs/skills)
+- [Factory AI / Droid Skills Documentation](https://docs.factory.ai/cli/configuration/skills)
+- [Claude Code Skills Documentation](https://code.claude.com/docs/en/skills)
+- [OpenClaw Skills Documentation](https://docs.openclaw.ai/tools/skills)
+- [Cline Skills Documentation](https://docs.cline.bot/features/skills)
+- [CodeBuddy Skills Documentation](https://www.codebuddy.ai/docs/ide/Features/Skills)
+- [Codex Skills Documentation](https://developers.openai.com/codex/skills)
+- [Command Code Skills Documentation](https://commandcode.ai/docs/skills)
+- [Crush Skills Documentation](https://github.com/charmbracelet/crush?tab=readme-ov-file#agent-skills)
+- [Cursor Skills Documentation](https://cursor.com/docs/context/skills)
+- [Firebender Skills Documentation](https://docs.firebender.com/multi-agent/skills)
+- [Gemini CLI Skills Documentation](https://geminicli.com/docs/cli/skills/)
+- [GitHub Copilot Agent Skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)
+- [iFlow CLI Skills Documentation](https://platform.iflow.cn/en/cli/examples/skill)
+- [Kimi Code CLI Skills Documentation](https://moonshotai.github.io/kimi-cli/en/customization/skills.html)
+- [Kiro CLI Skills Documentation](https://kiro.dev/docs/cli/custom-agents/configuration-reference/#skill-resources)
+- [Kode Skills Documentation](https://github.com/shareAI-lab/kode/blob/main/docs/skills.md)
+- [OpenCode Skills Documentation](https://opencode.ai/docs/skills)
+- [Qwen Code Skills Documentation](https://qwenlm.github.io/qwen-code-docs/en/users/features/skills/)
+- [OpenHands Skills Documentation](https://docs.openhands.ai/modules/usage/how-to/using-skills)
+- [Pi Skills Documentation](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md)
+- [Qoder Skills Documentation](https://docs.qoder.com/cli/Skills)
+- [Replit Skills Documentation](https://docs.replit.com/replitai/skills)
+- [Roo Code Skills Documentation](https://docs.roocode.com/features/skills)
+- [Trae Skills Documentation](https://docs.trae.ai/ide/skills)
+- [Vercel Agent Skills Repository](https://github.com/vercel-labs/agent-skills)
+>>>>>>> upstream/main
 
 ## License
 

@@ -12,7 +12,9 @@ export type AgentType =
   | 'cortex'
   | 'crush'
   | 'cursor'
+  | 'deepagents'
   | 'droid'
+  | 'firebender'
   | 'gemini-cli'
   | 'github-copilot'
   | 'goose'
@@ -35,6 +37,7 @@ export type AgentType =
   | 'roo'
   | 'trae'
   | 'trae-cn'
+  | 'warp'
   | 'windsurf'
   | 'zencoder'
   | 'pochi'
@@ -47,6 +50,8 @@ export interface Skill {
   path: string;
   /** Raw SKILL.md content for hashing */
   rawContent?: string;
+  /** Name of the plugin this skill belongs to (if any) */
+  pluginName?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -62,21 +67,13 @@ export interface AgentConfig {
 }
 
 export interface ParsedSource {
-  type: 'github' | 'gitlab' | 'git' | 'local' | 'direct-url' | 'well-known';
+  type: 'github' | 'gitlab' | 'git' | 'local' | 'well-known';
   url: string;
   subpath?: string;
   localPath?: string;
   ref?: string;
   /** Skill name extracted from @skill syntax (e.g., owner/repo@skill-name) */
   skillFilter?: string;
-}
-
-export interface MintlifySkill {
-  name: string;
-  description: string;
-  content: string;
-  mintlifySite: string;
-  sourceUrl: string;
 }
 
 /**
@@ -95,7 +92,7 @@ export interface RemoteSkill {
   sourceUrl: string;
   /** The provider that fetched this skill */
   providerId: string;
-  /** Source identifier for telemetry (e.g., "mintlify/bun.com") */
+  /** Source identifier for telemetry (e.g., "mintlify.com") */
   sourceIdentifier: string;
   /** Any additional metadata from frontmatter */
   metadata?: Record<string, unknown>;
