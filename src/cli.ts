@@ -6,6 +6,8 @@ import { basename, join, dirname } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
 import { runAdd, parseAddOptions, initTelemetry } from './add.ts';
+import { runBundles } from './bundles.ts';
+import { runAddBundle } from './add-bundle.ts';
 import { runFind } from './find.ts';
 import { runInstallFromLock } from './install.ts';
 import { runList } from './list.ts';
@@ -97,6 +99,12 @@ function showBanner(): void {
   console.log(
     `  ${DIM}$${RESET} ${TEXT}npx skills-il find ${DIM}[query]${RESET}         ${DIM}Search for skills${RESET}`
   );
+  console.log(
+    `  ${DIM}$${RESET} ${TEXT}npx skills-il bundles${RESET}              ${DIM}List available bundles${RESET}`
+  );
+  console.log(
+    `  ${DIM}$${RESET} ${TEXT}npx skills-il add-bundle ${DIM}<slug>${RESET}    ${DIM}Install all skills in a bundle${RESET}`
+  );
   console.log();
   console.log(
     `  ${DIM}$${RESET} ${TEXT}npx skills-il check${RESET}                ${DIM}Check for updates${RESET}`
@@ -132,6 +140,10 @@ ${BOLD}Manage Skills:${RESET}
   remove [skills]      Remove installed skills
   list, ls             List installed skills
   find [query]         Search for skills interactively
+
+${BOLD}Bundles:${RESET}
+  bundles              List available skill bundles (alias: bundle)
+  add-bundle <slug>    Install all skills in a bundle (alias: ab)
 
 ${BOLD}Updates:${RESET}
   check                Check for available skill updates
@@ -693,6 +705,18 @@ async function main(): Promise<void> {
     case 'update':
     case 'upgrade':
       runUpdate();
+      break;
+    case 'bundles':
+    case 'bundle':
+      showLogo();
+      console.log();
+      await runBundles();
+      break;
+    case 'add-bundle':
+    case 'ab':
+      showLogo();
+      console.log();
+      await runAddBundle(restArgs);
       break;
     case '--help':
     case '-h':
