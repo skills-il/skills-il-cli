@@ -3,6 +3,7 @@ import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
+import { getGitHubToken } from './skill-lock.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BUNDLES_REPO = { owner: 'skills-il', repo: 'bundles' };
@@ -23,7 +24,7 @@ interface BundleJson {
 export async function runAddBundle(args: string[]): Promise<void> {
   const slug = args[0];
   const dryRun = args.includes('--dry-run');
-  const passthrough = args.filter(a => a !== slug && a !== '--dry-run');
+  const passthrough = args.filter((a) => a !== slug && a !== '--dry-run');
 
   if (!slug) {
     console.log(pc.red('Usage: npx skills-il add-bundle <bundle-slug>'));
@@ -36,11 +37,14 @@ export async function runAddBundle(args: string[]): Promise<void> {
   console.log(pc.dim(`Fetching bundle "${slug}"...`));
 
   // Fetch bundle.json
+  const token = getGitHubToken();
   let bundleJson: BundleJson;
   try {
+    const fetchHeaders: Record<string, string> = { 'User-Agent': 'skills-il-cli' };
+    if (token) fetchHeaders['Authorization'] = `token ${token}`;
     const res = await fetch(
       `https://raw.githubusercontent.com/${BUNDLES_REPO.owner}/${BUNDLES_REPO.repo}/master/${slug}/bundle.json`,
-      { headers: { 'User-Agent': 'skills-il-cli' } }
+      { headers: fetchHeaders }
     );
 
     if (!res.ok) {
@@ -53,9 +57,11 @@ export async function runAddBundle(args: string[]): Promise<void> {
       return;
     }
 
-    bundleJson = await res.json() as BundleJson;
+    bundleJson = (await res.json()) as BundleJson;
   } catch (err) {
-    console.log(pc.red(`Error fetching bundle: ${err instanceof Error ? err.message : 'Unknown error'}`));
+    console.log(
+      pc.red(`Error fetching bundle: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    );
     return;
   }
 
@@ -148,7 +154,9 @@ export async function runAddBundle(args: string[]): Promise<void> {
 
   console.log();
   if (successCount > 0) {
-    console.log(`${pc.green('✓')} Bundle "${bundleJson.name_en}" installed (${successCount}/${skills.length} skills)`);
+    console.log(
+      `${pc.green('✓')} Bundle "${bundleJson.name_en}" installed (${successCount}/${skills.length} skills)`
+    );
   }
   if (failCount > 0) {
     console.log(`${pc.red('✗')} Failed: ${failures.join(', ')}`);

@@ -1,4 +1,5 @@
 import pc from 'picocolors';
+import { getGitHubToken } from './skill-lock.ts';
 
 const BUNDLES_REPO = { owner: 'skills-il', repo: 'bundles' };
 
@@ -16,10 +17,17 @@ export async function runBundles(): Promise<void> {
   console.log();
 
   try {
+    const token = getGitHubToken();
+    const ghHeaders: Record<string, string> = {
+      Accept: 'application/vnd.github.v3+json',
+      'User-Agent': 'skills-il-cli',
+    };
+    if (token) ghHeaders['Authorization'] = `token ${token}`;
+
     // Fetch directory listing from GitHub API
     const res = await fetch(
       `https://api.github.com/repos/${BUNDLES_REPO.owner}/${BUNDLES_REPO.repo}/contents?ref=master`,
-      { headers: { 'Accept': 'application/vnd.github.v3+json', 'User-Agent': 'skills-il-cli' } }
+      { headers: ghHeaders }
     );
 
     if (!res.ok) {
@@ -27,30 +35,33 @@ export async function runBundles(): Promise<void> {
       return;
     }
 
-    const items = await res.json() as Array<{ name: string; type: string }>;
-    const dirs = items.filter(i => i.type === 'dir');
+    const items = (await res.json()) as Array<{ name: string; type: string }>;
+    const dirs = items.filter((i) => i.type === 'dir');
 
     if (dirs.length === 0) {
       console.log(pc.dim('No bundles available yet.'));
       return;
     }
 
-    // Fetch bundle.json for each directory
-    const bundles: Array<{ slug: string; data: BundleJson }> = [];
-    for (const dir of dirs) {
-      try {
+    // Fetch bundle.json for each directory in parallel
+    const results = await Promise.allSettled(
+      dirs.map(async (dir) => {
         const jsonRes = await fetch(
           `https://raw.githubusercontent.com/${BUNDLES_REPO.owner}/${BUNDLES_REPO.repo}/master/${dir.name}/bundle.json`,
           { headers: { 'User-Agent': 'skills-il-cli' } }
         );
-        if (jsonRes.ok) {
-          const data = await jsonRes.json() as BundleJson;
-          bundles.push({ slug: dir.name, data });
-        }
-      } catch {
-        // Skip bundles with invalid json
-      }
-    }
+        if (!jsonRes.ok) return null;
+        const data = (await jsonRes.json()) as BundleJson;
+        return { slug: dir.name, data };
+      })
+    );
+    const bundles = results
+      .filter(
+        (r): r is PromiseFulfilledResult<{ slug: string; data: BundleJson } | null> =>
+          r.status === 'fulfilled'
+      )
+      .map((r) => r.value)
+      .filter((b): b is { slug: string; data: BundleJson } => b !== null);
 
     console.log(pc.bold(`📦 Available bundles (${bundles.length}):`));
     console.log();
