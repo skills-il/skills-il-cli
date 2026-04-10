@@ -95,16 +95,35 @@ When installing interactively, you can choose:
 | **Symlink** (Recommended) | Creates symlinks from each agent to a canonical copy. Single source of truth, easy updates. |
 | **Copy**                  | Creates independent copies for each agent. Use when symlinks aren't supported.              |
 
+## Skill Bundles
+
+Bundles are curated collections of skills that work together for a specific workflow. Install all skills in a bundle with a single command.
+
+```bash
+# List available bundles
+npx skills-il bundles
+
+# Install a bundle (all skills at once)
+npx skills-il add-bundle freelancer-accountant
+
+# Preview what will be installed
+npx skills-il add-bundle freelancer-accountant --dry-run
+```
+
+Browse bundles at **[agentskills.co.il/bundles](https://agentskills.co.il/bundles)**
+
 ## Other Commands
 
-| Command                         | Description                                    |
-| ------------------------------- | ---------------------------------------------- |
-| `npx skills-il list`            | List installed skills (alias: `ls`)            |
-| `npx skills-il find [query]`    | Search for skills interactively or by keyword  |
-| `npx skills-il remove [skills]` | Remove installed skills from agents            |
-| `npx skills-il check`           | Check for available skill updates              |
-| `npx skills-il update`          | Update all installed skills to latest versions |
-| `npx skills-il init [name]`     | Create a new SKILL.md template                 |
+| Command                                    | Description                                    |
+| ------------------------------------------ | ---------------------------------------------- |
+| `npx skills-il bundles`                    | List available skill bundles                   |
+| `npx skills-il add-bundle <slug>`          | Install all skills in a bundle                 |
+| `npx skills-il list`                       | List installed skills (alias: `ls`)            |
+| `npx skills-il find [query]`               | Search for skills interactively or by keyword  |
+| `npx skills-il remove [skills]`            | Remove installed skills from agents            |
+| `npx skills-il check`                      | Check for available skill updates              |
+| `npx skills-il update`                     | Update all installed skills to latest versions |
+| `npx skills-il init [name]`                | Create a new SKILL.md template                 |
 
 ### `skills-il list`
 
@@ -460,8 +479,6 @@ Telemetry is automatically disabled in CI environments.
 - [Roo Code Skills Documentation](https://docs.roocode.com/features/skills)
 - [Trae Skills Documentation](https://docs.trae.ai/ide/skills)
 - [Vercel Agent Skills Repository](https://github.com/vercel-labs/agent-skills)
->>>>>>> upstream/main
-
 ## License
 
 MIT - See [LICENSE](LICENSE) for details.
