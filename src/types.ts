@@ -92,7 +92,7 @@ export interface RemoteSkill {
   sourceUrl: string;
   /** The provider that fetched this skill */
   providerId: string;
-  /** Source identifier for telemetry (e.g., "mintlify.com") */
+  /** Source identifier for storage (e.g., "mintlify.com") */
   sourceIdentifier: string;
   /** Any additional metadata from frontmatter */
   metadata?: Record<string, unknown>;

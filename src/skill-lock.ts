@@ -23,7 +23,7 @@ export interface SkillLockEntry {
   /**
    * GitHub tree SHA for the entire skill folder.
    * This hash changes when ANY file in the skill folder changes.
-   * Fetched via GitHub Trees API by the telemetry server.
+   * Fetched via GitHub Trees API for update detection.
    */
   skillFolderHash: string;
   /** ISO timestamp when the skill was first installed */

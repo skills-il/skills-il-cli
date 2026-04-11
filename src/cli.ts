@@ -5,7 +5,7 @@ import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
 import { basename, join, dirname } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
-import { runAdd, parseAddOptions, initTelemetry } from './add.ts';
+import { runAdd, parseAddOptions } from './add.ts';
 import { runBundles } from './bundles.ts';
 import { runAddBundle } from './add-bundle.ts';
 import { runFind } from './find.ts';
@@ -13,7 +13,6 @@ import { runInstallFromLock } from './install.ts';
 import { runList } from './list.ts';
 import { removeCommand, parseRemoveOptions } from './remove.ts';
 import { runSync, parseSyncOptions } from './sync.ts';
-import { track } from './telemetry.ts';
 import { fetchSkillFolderHash, getGitHubToken } from './skill-lock.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -29,7 +28,6 @@ function getVersion(): string {
 }
 
 const VERSION = getVersion();
-initTelemetry(VERSION);
 
 const RESET = '\x1b[0m';
 const BOLD = '\x1b[1m';
@@ -496,13 +494,6 @@ async function runCheck(args: string[] = []): Promise<void> {
 
   printSkippedSkills(skipped);
 
-  // Track telemetry
-  track({
-    event: 'check',
-    skillCount: String(totalSkills),
-    updatesAvailable: String(updates.length),
-  });
-
   console.log();
 }
 
@@ -623,14 +614,6 @@ async function runUpdate(): Promise<void> {
   if (failCount > 0) {
     console.log(`${DIM}Failed to update ${failCount} skill(s)${RESET}`);
   }
-
-  // Track telemetry
-  track({
-    event: 'update',
-    skillCount: String(updates.length),
-    successCount: String(successCount),
-    failCount: String(failCount),
-  });
 
   console.log();
 }

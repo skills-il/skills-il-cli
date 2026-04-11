@@ -380,7 +380,7 @@ export class WellKnownProvider implements HostProvider {
   }
 
   /**
-   * Get the source identifier for telemetry/storage.
+   * Get the source identifier for storage.
    * Returns the full hostname with www. stripped.
    * e.g., "https://mintlify.com/docs" → "mintlify.com"
    *       "https://mppx-discovery-skills.vercel.app" → "mppx-discovery-skills.vercel.app"
