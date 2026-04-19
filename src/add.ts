@@ -306,6 +306,7 @@ export interface AddOptions {
   all?: boolean;
   fullDepth?: boolean;
   copy?: boolean;
+  viaGh?: boolean;
 }
 
 /**
@@ -753,6 +754,22 @@ async function handleWellKnownSkills(
 export async function runAdd(args: string[], options: AddOptions = {}): Promise<void> {
   const source = args[0];
   let installTipShown = false;
+
+  // Opt-in delegation to `gh skill install` for users who want GitHub's
+  // Sigstore-verified install path. Requires source in `owner/repo` form
+  // and explicit `--skill <name>`.
+  if (options.viaGh && source) {
+    const { isGhSkillAvailable, delegateToGhSkill } = await import('./via-gh.ts');
+    const available = await isGhSkillAvailable();
+    if (!available) {
+      console.log();
+      p.log.warn('`gh skill` is not installed; falling back to native flow.');
+    } else {
+      const ok = await delegateToGhSkill(source, options);
+      if (ok) return;
+      p.log.warn('Falling back to native flow after gh delegation failure.');
+    }
+  }
 
   const showInstallTip = (): void => {
     if (installTipShown) return;
@@ -1605,6 +1622,8 @@ export function parseAddOptions(args: string[]): { source: string[]; options: Ad
       options.fullDepth = true;
     } else if (arg === '--copy') {
       options.copy = true;
+    } else if (arg === '--via-gh') {
+      options.viaGh = true;
     } else if (arg && !arg.startsWith('-')) {
       source.push(arg);
     }
