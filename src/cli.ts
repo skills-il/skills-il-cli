@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import { runAdd, parseAddOptions } from './add.ts';
 import { runBundles } from './bundles.ts';
 import { runAddBundle } from './add-bundle.ts';
+import { runUpdateBundle } from './update-bundle.ts';
 import { runFind } from './find.ts';
 import { runInstallFromLock } from './install.ts';
 import { runList } from './list.ts';
@@ -142,6 +143,7 @@ ${BOLD}Manage Skills:${RESET}
 ${BOLD}Bundles:${RESET}
   bundles              List available skill bundles (alias: bundle)
   add-bundle <slug>    Install all skills in a bundle (alias: ab)
+  update-bundle <slug> Add new + update changed skills in a bundle (alias: ub)
 
 ${BOLD}Updates:${RESET}
   check                Check for available skill updates
@@ -700,6 +702,12 @@ async function main(): Promise<void> {
       showLogo();
       console.log();
       await runAddBundle(restArgs);
+      break;
+    case 'update-bundle':
+    case 'ub':
+      showLogo();
+      console.log();
+      await runUpdateBundle(restArgs);
       break;
     case '--help':
     case '-h':
