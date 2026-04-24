@@ -8,9 +8,27 @@ const DESIGN_REPO = { owner: 'skills-il', repo: 'design-systems' };
 const DESIGN_API_BASE = 'https://agentskills.co.il';
 
 const SLUG_RE = /^[a-z0-9-]+$/;
+const AGENT_RE = /^[a-z0-9-]+$/;
+
+function parseArgs(args: string[]): { slug: string | undefined; agent: string | null } {
+  let agent: string | null = null;
+  const positional: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '-a' || a === '--agent') {
+      const next = args[i + 1];
+      if (next && AGENT_RE.test(next)) agent = next;
+      i++;
+      continue;
+    }
+    if (a === '-y' || a === '--yes') continue;
+    if (a && !a.startsWith('-')) positional.push(a);
+  }
+  return { slug: positional[0], agent };
+}
 
 export async function runUpdateDesign(args: string[]): Promise<void> {
-  const slug = args[0];
+  const { slug, agent } = parseArgs(args);
   const force = args.includes('-y') || args.includes('--yes');
 
   if (!slug) {
@@ -54,7 +72,7 @@ export async function runUpdateDesign(args: string[]): Promise<void> {
   }
 
   writeFileSync(targetPath, remote, 'utf-8');
-  trackInstall(slug);
+  trackInstall(slug, agent);
 
   console.log();
   console.log(pc.green(`✓ Updated DESIGN.md`));
@@ -87,11 +105,12 @@ async function fetchDesignMd(slug: string): Promise<string | null> {
   }
 }
 
-function trackInstall(slug: string): void {
+function trackInstall(slug: string, agent: string | null): void {
+  const tool = agent ?? 'cli';
   fetch(`${DESIGN_API_BASE}/api/design/${encodeURIComponent(slug)}/install`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'User-Agent': 'skills-il-cli' },
-    body: JSON.stringify({ tool: 'cli' }),
+    body: JSON.stringify({ tool }),
   }).catch(() => {
     /* silent */
   });

@@ -8,9 +8,29 @@ const DESIGN_REPO = { owner: 'skills-il', repo: 'design-systems' };
 const DESIGN_API_BASE = 'https://agentskills.co.il';
 
 const SLUG_RE = /^[a-z0-9-]+$/;
+const AGENT_RE = /^[a-z0-9-]+$/;
+
+/** Pull `-a <agent>` / `--agent <agent>` out of the arg list, return both
+ *  the agent (or null) and the slug (first non-flag positional). */
+function parseArgs(args: string[]): { slug: string | undefined; agent: string | null } {
+  let agent: string | null = null;
+  const positional: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '-a' || a === '--agent') {
+      const next = args[i + 1];
+      if (next && AGENT_RE.test(next)) agent = next;
+      i++;
+      continue;
+    }
+    if (a === '-y' || a === '--yes') continue;
+    if (a && !a.startsWith('-')) positional.push(a);
+  }
+  return { slug: positional[0], agent };
+}
 
 export async function runAddDesign(args: string[]): Promise<void> {
-  const slug = args[0];
+  const { slug, agent } = parseArgs(args);
   const force = args.includes('-y') || args.includes('--yes');
 
   if (!slug) {
@@ -51,7 +71,7 @@ export async function runAddDesign(args: string[]): Promise<void> {
   }
 
   writeFileSync(targetPath, source, 'utf-8');
-  trackInstall(slug);
+  trackInstall(slug, agent);
 
   console.log();
   console.log(pc.green(`✓ Wrote DESIGN.md`));
@@ -92,15 +112,18 @@ async function fetchDesignMd(slug: string): Promise<string | null> {
 }
 
 /**
- * Fire-and-forget install tracking. Matches the `install_click` pipeline the
- * website uses (`/api/design/:slug/install` with `{ tool: 'cli' }`), so
- * `design_systems.installs_by_tool.cli` ticks up when the CLI is used.
+ * Fire-and-forget install tracking. POSTs `{tool}` to the design install
+ * endpoint so `design_systems.installs_by_tool` records per-agent buckets
+ * (`{claude-code: n, cursor: n, cli: n, ...}`). When the user passes
+ * `-a <agent>`, that agent name is the tool key; otherwise we fall back
+ * to the generic `cli` bucket.
  */
-function trackInstall(slug: string): void {
+function trackInstall(slug: string, agent: string | null): void {
+  const tool = agent ?? 'cli';
   fetch(`${DESIGN_API_BASE}/api/design/${encodeURIComponent(slug)}/install`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'User-Agent': 'skills-il-cli' },
-    body: JSON.stringify({ tool: 'cli' }),
+    body: JSON.stringify({ tool }),
   }).catch(() => {
     // Silent: telemetry must never block a working install.
   });

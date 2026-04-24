@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "hebrew-legal-research": {
+      "source": "skills-il/security-compliance",
+      "sourceType": "github",
+      "computedHash": "276cce3aa311379d3984b69b6baa77adedb89409f8657a05c57df8d3c53868b2"
+    }
+  }
+}
