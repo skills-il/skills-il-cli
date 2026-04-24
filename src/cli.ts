@@ -9,6 +9,8 @@ import { runAdd, parseAddOptions } from './add.ts';
 import { runBundles } from './bundles.ts';
 import { runAddBundle } from './add-bundle.ts';
 import { runUpdateBundle } from './update-bundle.ts';
+import { runAddDesign } from './add-design.ts';
+import { runUpdateDesign } from './update-design.ts';
 import { runFind } from './find.ts';
 import { runInstallFromLock } from './install.ts';
 import { runList } from './list.ts';
@@ -104,6 +106,9 @@ function showBanner(): void {
   console.log(
     `  ${DIM}$${RESET} ${TEXT}npx skills-il add-bundle ${DIM}<slug>${RESET}    ${DIM}Install all skills in a bundle${RESET}`
   );
+  console.log(
+    `  ${DIM}$${RESET} ${TEXT}npx skills-il add-design ${DIM}<slug>${RESET}    ${DIM}Install a DESIGN.md system${RESET}`
+  );
   console.log();
   console.log(
     `  ${DIM}$${RESET} ${TEXT}npx skills-il check${RESET}                ${DIM}Check for updates${RESET}`
@@ -144,6 +149,10 @@ ${BOLD}Bundles:${RESET}
   bundles              List available skill bundles (alias: bundle)
   add-bundle <slug>    Install all skills in a bundle (alias: ab)
   update-bundle <slug> Add new + update changed skills in a bundle (alias: ub)
+
+${BOLD}Design Systems:${RESET}
+  add-design <slug>    Install a DESIGN.md system to ./DESIGN.md (alias: ad)
+  update-design <slug> Re-fetch and refresh ./DESIGN.md (alias: ud)
 
 ${BOLD}Updates:${RESET}
   check                Check for available skill updates
@@ -708,6 +717,18 @@ async function main(): Promise<void> {
       showLogo();
       console.log();
       await runUpdateBundle(restArgs);
+      break;
+    case 'add-design':
+    case 'ad':
+      showLogo();
+      console.log();
+      await runAddDesign(restArgs);
+      break;
+    case 'update-design':
+    case 'ud':
+      showLogo();
+      console.log();
+      await runUpdateDesign(restArgs);
       break;
     case '--help':
     case '-h':
