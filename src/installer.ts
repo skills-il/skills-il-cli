@@ -332,6 +332,24 @@ const isExcluded = (name: string, isDirectory: boolean = false): boolean => {
   return false;
 };
 
+/**
+ * Path-aware version of isExcluded for the remote-install code path
+ * (`skill.files` is `Map<relativePath, content>`). Checks the basename
+ * of the file plus every directory segment so e.g. `references/.hidden`
+ * and `__pycache__/x.pyc` are dropped alongside bare `metadata.json`.
+ */
+const isPathExcluded = (filePath: string): boolean => {
+  const segments = filePath.split(/[/\\]/).filter(Boolean);
+  if (segments.length === 0) return false;
+  const last = segments[segments.length - 1];
+  if (last && isExcluded(last, false)) return true;
+  for (let i = 0; i < segments.length - 1; i++) {
+    const seg = segments[i];
+    if (seg && isExcluded(seg, true)) return true;
+  }
+  return false;
+};
+
 async function copyDirectory(src: string, dest: string): Promise<void> {
   await mkdir(dest, { recursive: true });
 
@@ -620,17 +638,20 @@ export async function installWellKnownSkillForAgent(
   }
 
   /**
-   * Write all skill files to a directory (assumes directory already exists)
+   * Write all skill files to a directory (assumes directory already exists).
+   * Applies the same EXCLUDE_FILES / EXCLUDE_DIRS filter copyDirectory uses
+   * so remote installs (files loaded via GitHub API) don't ship directory-
+   * only artifacts like metadata.json into the user's project.
    */
   async function writeSkillFiles(targetDir: string): Promise<void> {
     for (const [filePath, content] of skill.files) {
-      // Validate file path doesn't escape the target directory
+      if (isPathExcluded(filePath)) continue;
+
       const fullPath = join(targetDir, filePath);
       if (!isPathSafe(targetDir, fullPath)) {
-        continue; // Skip files that would escape the directory
+        continue;
       }
 
-      // Create parent directories if needed
       const parentDir = dirname(fullPath);
       if (parentDir !== targetDir) {
         await mkdir(parentDir, { recursive: true });
