@@ -129,9 +129,11 @@ const SOURCE_ALIASES: Record<string, string> = {
 };
 
 // Recognizes the @<suffix> portion of `owner/repo@<suffix>` as a version pin:
-// either a `vX.Y.Z` semver tag or a 7-40 character lowercase hex commit SHA.
-// Anything else is treated as a skill-name filter (existing behavior).
-const REF_PATTERN = /^(v\d+\.\d+\.\d+|[0-9a-f]{7,40})$/;
+// either a `vX.Y.Z` semver tag (with optional `-<suffix>` for per-skill tag
+// schemes like `v1.0.0-israeli-vat-reporting` used in multi-skill repos), or
+// a 7-40 character lowercase hex commit SHA. Anything else is treated as a
+// skill-name filter (existing behavior).
+const REF_PATTERN = /^(v\d+\.\d+\.\d+(?:-[\w.-]+)?|[0-9a-f]{7,40})$/;
 
 export function parseSource(input: string): ParsedSource {
   // Resolve source aliases before parsing

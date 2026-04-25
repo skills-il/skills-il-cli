@@ -123,6 +123,15 @@ describe('source-parser', () => {
       });
     });
 
+    it('parses @v<semver>-<slug> per-skill tag as a version pin (sets ref)', () => {
+      const result = parseSource('skills-il/tax-and-finance@v1.0.5-israeli-vat-reporting');
+      expect(result).toEqual({
+        type: 'github',
+        url: 'https://github.com/skills-il/tax-and-finance.git',
+        ref: 'v1.0.5-israeli-vat-reporting',
+      });
+    });
+
     it('still parses @<skill-name> as a skill filter (existing behavior)', () => {
       const result = parseSource('vercel-labs/agent-skills@pr-review');
       expect(result).toEqual({
