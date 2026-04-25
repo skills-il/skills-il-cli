@@ -128,6 +128,11 @@ const SOURCE_ALIASES: Record<string, string> = {
   'coinbase/agentWallet': 'coinbase/agentic-wallet-skills',
 };
 
+// Recognizes the @<suffix> portion of `owner/repo@<suffix>` as a version pin:
+// either a `vX.Y.Z` semver tag or a 7-40 character lowercase hex commit SHA.
+// Anything else is treated as a skill-name filter (existing behavior).
+const REF_PATTERN = /^(v\d+\.\d+\.\d+|[0-9a-f]{7,40})$/;
+
 export function parseSource(input: string): ParsedSource {
   // Resolve source aliases before parsing
   const alias = SOURCE_ALIASES[input];
@@ -239,16 +244,24 @@ export function parseSource(input: string): ParsedSource {
     }
   }
 
-  // GitHub shorthand: owner/repo, owner/repo/path/to/skill, or owner/repo@skill-name
-  // Exclude paths that start with . or / to avoid matching local paths
-  // First check for @skill syntax: owner/repo@skill-name
-  const atSkillMatch = input.match(/^([^/]+)\/([^/@]+)@(.+)$/);
-  if (atSkillMatch && !input.includes(':') && !input.startsWith('.') && !input.startsWith('/')) {
-    const [, owner, repo, skillFilter] = atSkillMatch;
+  // GitHub shorthand: owner/repo, owner/repo/path/to/skill, or owner/repo@<suffix>
+  // Exclude paths that start with . or / to avoid matching local paths.
+  // The @<suffix> can be either a version pin (semver tag like v1.2.3, or a 7-40 char
+  // commit SHA) which becomes parsed.ref, or a skill name which becomes parsed.skillFilter.
+  const atSuffixMatch = input.match(/^([^/]+)\/([^/@]+)@(.+)$/);
+  if (atSuffixMatch && !input.includes(':') && !input.startsWith('.') && !input.startsWith('/')) {
+    const [, owner, repo, suffix] = atSuffixMatch;
+    if (REF_PATTERN.test(suffix!)) {
+      return {
+        type: 'github',
+        url: `https://github.com/${owner}/${repo}.git`,
+        ref: suffix,
+      };
+    }
     return {
       type: 'github',
       url: `https://github.com/${owner}/${repo}.git`,
-      skillFilter,
+      skillFilter: suffix,
     };
   }
 

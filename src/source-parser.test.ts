@@ -92,4 +92,61 @@ describe('source-parser', () => {
       });
     });
   });
+
+  describe('@<suffix> shorthand', () => {
+    it('parses @v<semver> as a version pin (sets ref)', () => {
+      const result = parseSource('skills-il/tax-and-finance@v1.2.3');
+      expect(result).toEqual({
+        type: 'github',
+        url: 'https://github.com/skills-il/tax-and-finance.git',
+        ref: 'v1.2.3',
+      });
+    });
+
+    it('parses @<short-sha> as a version pin (sets ref)', () => {
+      const result = parseSource('skills-il/tax-and-finance@abcdef1');
+      expect(result).toEqual({
+        type: 'github',
+        url: 'https://github.com/skills-il/tax-and-finance.git',
+        ref: 'abcdef1',
+      });
+    });
+
+    it('parses @<full-sha> as a version pin (sets ref)', () => {
+      const result = parseSource(
+        'skills-il/tax-and-finance@1234567890abcdef1234567890abcdef12345678'
+      );
+      expect(result).toEqual({
+        type: 'github',
+        url: 'https://github.com/skills-il/tax-and-finance.git',
+        ref: '1234567890abcdef1234567890abcdef12345678',
+      });
+    });
+
+    it('still parses @<skill-name> as a skill filter (existing behavior)', () => {
+      const result = parseSource('vercel-labs/agent-skills@pr-review');
+      expect(result).toEqual({
+        type: 'github',
+        url: 'https://github.com/vercel-labs/agent-skills.git',
+        skillFilter: 'pr-review',
+      });
+    });
+
+    it('treats names that look semver-ish but are not as skill filters', () => {
+      // `v1.2` is missing the patch component, so it's not a ref
+      const result = parseSource('owner/repo@v1.2');
+      expect(result).toMatchObject({
+        type: 'github',
+        skillFilter: 'v1.2',
+      });
+    });
+
+    it('does not treat short non-hex strings as SHAs', () => {
+      const result = parseSource('owner/repo@hebrew-date');
+      expect(result).toMatchObject({
+        type: 'github',
+        skillFilter: 'hebrew-date',
+      });
+    });
+  });
 });
