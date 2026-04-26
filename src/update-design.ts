@@ -5,7 +5,9 @@ import { createInterface } from 'readline/promises';
 import { getGitHubToken } from './skill-lock.ts';
 
 const DESIGN_REPO = { owner: 'skills-il', repo: 'design-systems' };
-const DESIGN_API_BASE = 'https://agentskills.co.il';
+// Backend hosts install tracking under /v1/design-systems/:slug/install.
+// Override with `SKILLS_IL_API_BASE` to point at staging (e.g. dev backend).
+const API_BASE = process.env.SKILLS_IL_API_BASE ?? 'https://api.agentskills.co.il';
 
 const SLUG_RE = /^[a-z0-9-]+$/;
 const AGENT_RE = /^[a-z0-9-]+$/;
@@ -107,7 +109,7 @@ async function fetchDesignMd(slug: string): Promise<string | null> {
 
 function trackInstall(slug: string, agent: string | null): void {
   const tool = agent ?? 'cli';
-  fetch(`${DESIGN_API_BASE}/api/design/${encodeURIComponent(slug)}/install`, {
+  fetch(`${API_BASE}/v1/design-systems/${encodeURIComponent(slug)}/install`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'User-Agent': 'skills-il-cli' },
     body: JSON.stringify({ tool }),
