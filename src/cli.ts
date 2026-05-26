@@ -172,6 +172,8 @@ ${BOLD}Add Options:${RESET}
   --copy                 Copy files instead of symlinking to agent directories
   --all                  Shorthand for --skill '*' --agent '*' -y
   --full-depth           Search all subdirectories even when a root SKILL.md exists
+  --with-recommended     Also install every skill listed in the source skill's
+                         metadata.json "recommended_skills" array (one level only)
 
 ${BOLD}Remove Options:${RESET}
   -g, --global           Remove from global scope

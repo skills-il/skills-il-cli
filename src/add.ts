@@ -1,8 +1,8 @@
 import * as p from '@clack/prompts';
 import pc from 'picocolors';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { homedir } from 'os';
-import { sep } from 'path';
+import { sep, join } from 'path';
 import { parseSource, resolveAndParseSource, getOwnerRepo } from './source-parser.ts';
 import { searchMultiselect, cancelSymbol } from './prompts/search-multiselect.ts';
 
@@ -307,6 +307,7 @@ export interface AddOptions {
   fullDepth?: boolean;
   copy?: boolean;
   viaGh?: boolean;
+  withRecommended?: boolean;
 }
 
 /**
@@ -1469,6 +1470,20 @@ export async function runAdd(args: string[], options: AddOptions = {}): Promise<
       }
     }
 
+    // Install companion (recommended) skills if requested. Runs while tempDir
+    // is still around so we can read each installed skill's metadata.json.
+    if (options.withRecommended && successful.length > 0) {
+      const installedSkillNames = new Set(successful.map((r) => r.skill));
+      const skillsToInspect = selectedSkills.filter((s) => installedSkillNames.has(s.name));
+      try {
+        await installRecommendedSkills(skillsToInspect, options);
+      } catch (err) {
+        p.log.warn(
+          `Companion skills install failed: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
+
     console.log();
     p.outro(
       pc.green('Done!') +
@@ -1492,6 +1507,125 @@ export async function runAdd(args: string[], options: AddOptions = {}): Promise<
     process.exit(1);
   } finally {
     await cleanup(tempDir);
+  }
+}
+
+/**
+ * Install the `recommended_skills` listed in each installed skill's metadata.json.
+ *
+ * Each entry is a bare slug; we resolve it via the public catalog API
+ * (https://api.agentskills.co.il) to get the canonical install command,
+ * then recursively invoke runAdd for each. Skips skills the API doesn't know
+ * about. One level deep only — recommendations of recommendations don't recurse.
+ */
+async function installRecommendedSkills(
+  installedSkills: Skill[],
+  parentOptions: AddOptions
+): Promise<void> {
+  // Collect unique recommended slugs from every installed skill's metadata.json.
+  // Skills coming from skills-il/courses live alongside metadata.json in the
+  // same folder; for catalog skills it's also colocated.
+  const recommendedSlugs = new Set<string>();
+  const skipSelf = new Set<string>(installedSkills.map((s) => s.name));
+
+  for (const skill of installedSkills) {
+    const metaPath = join(skill.path, 'metadata.json');
+    if (!existsSync(metaPath)) continue;
+    try {
+      const meta = JSON.parse(readFileSync(metaPath, 'utf-8')) as {
+        recommended_skills?: unknown;
+      };
+      if (Array.isArray(meta.recommended_skills)) {
+        for (const slug of meta.recommended_skills) {
+          if (typeof slug === 'string' && !skipSelf.has(slug)) {
+            recommendedSlugs.add(slug);
+          }
+        }
+      }
+    } catch {
+      // metadata.json malformed → skip silently
+    }
+  }
+
+  if (recommendedSlugs.size === 0) {
+    return;
+  }
+
+  console.log();
+  p.log.step(
+    pc.bold(
+      `Installing ${recommendedSlugs.size} companion skill${recommendedSlugs.size > 1 ? 's' : ''}`
+    )
+  );
+
+  const API_BASE = process.env.SKILLS_IL_API_URL || 'https://api.agentskills.co.il';
+
+  // Resolve each slug to a source argument via the catalog API.
+  // Try /v1/skills/:slug first, fall back to /v1/courses/:slug (some
+  // recommendations point at other courses).
+  const sources: string[] = [];
+  for (const slug of recommendedSlugs) {
+    let installCommand: string | null = null;
+    for (const path of [`/v1/skills/${slug}`, `/v1/courses/${slug}`]) {
+      try {
+        const res = await fetch(`${API_BASE}${path}`, {
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!res.ok) continue;
+        const data = (await res.json()) as { install_command?: string };
+        if (typeof data.install_command === 'string' && data.install_command.length > 0) {
+          installCommand = data.install_command;
+          break;
+        }
+      } catch {
+        // Network error, try next path
+      }
+    }
+
+    if (!installCommand) {
+      p.log.warn(`Could not resolve recommended skill: ${pc.yellow(slug)}`);
+      continue;
+    }
+
+    // Extract the args from an `npx skills-il add <args>` string.
+    // The remainder may include source + --skill flag combinations.
+    const m = installCommand.match(/^npx\s+skills-il\s+add\s+(.+)$/);
+    if (!m) {
+      p.log.warn(`Unexpected install_command shape for ${slug}: ${installCommand}`);
+      continue;
+    }
+    sources.push(m[1]!.trim());
+  }
+
+  if (sources.length === 0) {
+    p.log.info('No companion skills resolved');
+    return;
+  }
+
+  // Inherit non-interactive flags from the parent install so the user isn't
+  // re-prompted for each companion. Force `withRecommended:false` to prevent
+  // recursive recommendation chains.
+  const childOptions: AddOptions = {
+    yes: true,
+    global: parentOptions.global,
+    agent: parentOptions.agent,
+    copy: parentOptions.copy,
+    withRecommended: false,
+  };
+
+  for (const sourceArgs of sources) {
+    // Tokenize the args string (simple whitespace split is fine for known shapes:
+    // `<source>` or `<source> --skill <name>` or `<source>@<ref>`)
+    const tokens = sourceArgs.split(/\s+/).filter(Boolean);
+    try {
+      await runAdd(tokens, { ...childOptions });
+    } catch (err) {
+      p.log.warn(
+        `Failed to install companion ${pc.yellow(tokens[0] ?? '?')}: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
   }
 }
 
@@ -1624,6 +1758,8 @@ export function parseAddOptions(args: string[]): { source: string[]; options: Ad
       options.copy = true;
     } else if (arg === '--via-gh') {
       options.viaGh = true;
+    } else if (arg === '--with-recommended' || arg === '--with-companions') {
+      options.withRecommended = true;
     } else if (arg && !arg.startsWith('-')) {
       source.push(arg);
     }
